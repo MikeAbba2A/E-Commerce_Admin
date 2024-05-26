@@ -26,7 +26,7 @@ export const billboardColumns: ColumnDef<BillboardColumn>[] = [
   },
 ]
 
-// Définition et exportation d'OrderColumn (existante)
+// Définition et exportation d'OrderColumn
 export type OrderColumn = {
   id: string
   phone: string

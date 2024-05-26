@@ -27,8 +27,8 @@ import { AlertModal } from "@/components/modals/alert-modal";
 import ImageUpload from "@/components/ui/image-upload";
 
 const formSchema = z.object({
-    name: z.string().min(5, {
-        message: 'Le nom doit comporter au moins 5 caractères.',
+    name: z.string().min(1, {
+        message: 'Le nom doit comporter au moins 1 caractères.',
     }),
     value: z.string().min(1, {
         message: 'Le nom doit comporter au moins 1 caractères.',
