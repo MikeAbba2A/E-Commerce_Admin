@@ -31,7 +31,7 @@ export async function POST(
             return new NextResponse("Un nom est requis", { status: 400 });
         }
 
-        if(!name){
+        if(!description){
             return new NextResponse("Une description est requise", { status: 400 });
         }
 
@@ -73,7 +73,7 @@ export async function POST(
         const product = await prismadb.product.create({
             data: {
                 name,
-                description,
+                description,  // Ajoutez cette ligne
                 price,
                 isFeatured,
                 isArchived,
@@ -83,9 +83,7 @@ export async function POST(
                 storeId: params.storeId,
                 images: {
                     createMany: {
-                        data: [
-                            ...images.map((image : { url: string }) => image )
-                        ]
+                        data: images.map((image: { url: string }) => image)
                     }
                 }
             }
