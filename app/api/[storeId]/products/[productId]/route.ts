@@ -38,8 +38,6 @@ export async function PATCH(
         const { userId } = auth();
         const body = await req.json(); 
 
-        console.log("Received body:", body);
-
         const { 
             name,
             description,
@@ -92,8 +90,6 @@ export async function PATCH(
                 }
             }
         });
-
-        console.log("Product updated successfully:", updatedProduct);
 
         return NextResponse.json(updatedProduct);
     } catch (error) {
