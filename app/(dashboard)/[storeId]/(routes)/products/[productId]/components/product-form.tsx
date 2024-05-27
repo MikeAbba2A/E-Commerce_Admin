@@ -33,7 +33,7 @@ const formSchema = z.object({
     name: z.string().min(5, {
         message: 'Le nom doit comporter au moins 5 caractères.',
     }),
-    description: z.string().min(10, {
+    description: z.string().min(500, {
         message: 'La description doit comporter au moins 10 caractères.',
     }),
     images: z.object({ url: z.string() }).array(),
