@@ -33,6 +33,9 @@ const formSchema = z.object({
     name: z.string().min(5, {
         message: 'Le nom doit comporter au moins 5 caractères.',
     }),
+    description: z.string().min(10, {
+        message: 'La description doit comporter au moins 10 caractères.',
+    }),
     images: z.object({ url: z.string() }).array(),
     price: z.coerce.number().min(1),
     categoryId: z.string().min(1),
@@ -76,8 +79,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             ...initialData,
             price: parseFloat(String(initialData?.price)),
             images: initialData.images.map((image) => ({ url: image.url })),
+            description: initialData.description,  // Ajoutez ceci
         } : {
             name: '',
+            description: '',  // Ajoutez ceci
             images: [],
             price: 0,
             categoryId: '',
@@ -363,6 +368,24 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                                             Ce produit n&apos;apparaitra plus sur le store
                                         </FormDescription>
                                     </div>
+                                </FormItem>
+                            )}
+                        />
+                        <FormField 
+                            control={form.control}
+                            name="description"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel></FormLabel>
+                                    <FormControl>
+                                        <textarea 
+                                            className="input"
+                                            disabled={loading} 
+                                            placeholder="Description du produit" 
+                                            {...field} 
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
                                 </FormItem>
                             )}
                         />

@@ -89,6 +89,7 @@ model Product {
   categoryId  String
   category    Category  @relation("CategoryToProduct", fields: [categoryId], references: [id])
   name        String
+  description String   // Ajoutez ce champ
   price       Decimal   
   isFeatured  Boolean   @default(false)
   isArchived  Boolean   @default(false)
@@ -105,7 +106,7 @@ model Product {
   @@index([categoryId])
   @@index([sizeId])
   @@index([colorId])
-  }
+}
 
 model Image {
   id          String    @id @default(uuid())
