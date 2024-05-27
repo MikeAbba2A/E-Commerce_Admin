@@ -79,10 +79,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             ...initialData,
             price: parseFloat(String(initialData?.price)),
             images: initialData.images.map((image) => ({ url: image.url })),
-            description: initialData.description,  // Ajoutez ceci
+            description: initialData.description,
         } : {
             name: '',
-            description: '',  // Ajoutez ceci
+            description: '',
             images: [],
             price: 0,
             categoryId: '',
@@ -94,26 +94,26 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     });
 
     const onSubmit = async (data: ProductFormValues) => {
-        console.log('Form submitted with data:', data); // Log des données soumises
+        console.log('Form submitted with data:', data);
         try {
             setLoading(true);
             if (initialData) {
-                console.log('Updating product with ID:', params.productId); // Log lors de la mise à jour d'un produit existant
+                console.log('Updating product with ID:', params.productId);
                 await axios.patch(`/api/${params.storeId}/products/${params.productId}`, data);
             } else {
-                console.log('Creating new product'); // Log lors de la création d'un nouveau produit
+                console.log('Creating new product');
                 await axios.post(`/api/${params.storeId}/products`, data);
             }
-            console.log('Form submission successful'); // Log si la soumission réussit
+            console.log('Form submission successful');
             router.refresh();
             router.push(`/${params.storeId}/products`);
             toast.success(toastMessage);
         } catch (error) {
-            console.error('Error during form submission:', error); // Log en cas d'erreur
+            console.error('Error during form submission:', error);
             toast.error("Une erreur est survenue");
         } finally {
             setLoading(false);
-            console.log('Loading state set to false'); // Log à la fin de la soumission du formulaire
+            console.log('Loading state set to false');
         }
     };
 

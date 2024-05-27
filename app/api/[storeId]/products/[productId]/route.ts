@@ -38,7 +38,7 @@ export async function PATCH(
         const { userId } = auth();
         const body = await req.json(); 
 
-        console.log("Received body:", body); // Log des données reçues
+        console.log("Received body:", body);
 
         const { 
             name,
@@ -77,7 +77,7 @@ export async function PATCH(
             },
             data: {
                 name,
-                description, // Ajoutez description ici
+                description,
                 price,
                 categoryId,
                 colorId,
@@ -93,11 +93,11 @@ export async function PATCH(
             }
         });
 
-        console.log("Product updated successfully:", updatedProduct); // Log de la mise à jour réussie
+        console.log("Product updated successfully:", updatedProduct);
 
         return NextResponse.json(updatedProduct);
     } catch (error) {
-        console.error('[PRODUCTS_PATCH]', error); // Log de l'erreur
+        console.error('[PRODUCTS_PATCH]', error);
         return new NextResponse("Internal error", { status: 500 });
     }
 }
