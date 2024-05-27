@@ -23,6 +23,8 @@ export async function POST(
             isArchived
         } = body;
 
+        console.log("Received data:", body);
+
         if(!userId){
             return new NextResponse("Non authentifié", { status: 401 });
         }
@@ -36,15 +38,15 @@ export async function POST(
         }
 
         if(!price){
-            return new NextResponse("Un prix est requise", { status: 400 });
+            return new NextResponse("Un prix est requis", { status: 400 });
         }
 
         if(!categoryId){
-            return new NextResponse("Un prix est requise", { status: 400 });
+            return new NextResponse("Une catégorie est requise", { status: 400 });
         }
 
         if(!colorId){
-            return new NextResponse("Id de coueur requis", { status: 400 });
+            return new NextResponse("Id de couleur requis", { status: 400 });
         }
 
         if(!sizeId){
@@ -56,7 +58,7 @@ export async function POST(
         }
 
         if(!params.storeId){
-            return new NextResponse("Categorie ID est requis", { status: 400 });
+            return new NextResponse("Store ID est requis", { status: 400 });
         }
 
         const storeByUserId = await prismadb.store.findFirst({
@@ -73,7 +75,7 @@ export async function POST(
         const product = await prismadb.product.create({
             data: {
                 name,
-                description,  // Ajoutez cette ligne
+                description,
                 price,
                 isFeatured,
                 isArchived,
@@ -83,7 +85,9 @@ export async function POST(
                 storeId: params.storeId,
                 images: {
                     createMany: {
-                        data: images.map((image: { url: string }) => image)
+                        data: [
+                            ...images.map((image : { url: string }) => image )
+                        ]
                     }
                 }
             }
@@ -91,8 +95,8 @@ export async function POST(
 
         return NextResponse.json(product);
 
-    }catch(error){
-        console.log('[PRODUCTS_POST]', error);
+    } catch(error) {
+        console.error('[PRODUCTS_POST]', error); // Ajoutez ce log pour capturer l'erreur
         return new NextResponse("Internal error", { status: 500 });
     }
 }
