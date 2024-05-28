@@ -125,7 +125,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             router.push(`/${params.storeId}/products`);
             toast.success("Produit supprimé");
         } catch (error) {
-            toast.error("Assurez-vous d'abord d'avoir supprimé toutes vos catégories");
+            console.error('Error during product deletion:', error);
+            toast.error("Une erreur est survenue lors de la suppression");
         } finally {
             setLoading(false);
             setOpen(false);

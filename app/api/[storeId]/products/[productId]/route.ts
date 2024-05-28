@@ -99,19 +99,23 @@ export async function PATCH(
 }
 
 
-export async function DELETE (
+export async function DELETE(
     req: Request,
-    { params }: { params: { storeId: string, productId: string } }
+    { params }: { params: { storeId: string; productId: string } }
 ){
-    try{
+    try {
         const { userId } = auth();
 
-        if(!userId){
+        console.log("User ID:", userId);
+        console.log("Store ID:", params.storeId);
+        console.log("Product ID:", params.productId);
+
+        if (!userId) {
             return new NextResponse("Non authentifié", { status: 401 });
         }
 
-        if(!params.productId){
-            return new NextResponse("productId obligatoire", { status: 400 });
+        if (!params.productId) {
+            return new NextResponse("Product ID est requis", { status: 400 });
         }
 
         const storeByUserId = await prismadb.store.findFirst({
@@ -121,20 +125,21 @@ export async function DELETE (
             }
         });
 
-        if(!storeByUserId){
+        if (!storeByUserId) {
             return new NextResponse("Non autorisé", { status: 403 });
         }
 
-        const product = await prismadb.product.deleteMany({
-            where:{
+        await prismadb.product.delete({
+            where: {
                 id: params.productId,
-            }  
+            },
         });
-        return NextResponse.json(product);
 
-    }catch(error){
-        console.log('[PRODUCTS_DELETE]', error);
+        console.log("Product deleted successfully");
+        return new NextResponse("Produit supprimé", { status: 200 });
+    } catch (error) {
+        console.error('[PRODUCTS_DELETE]', error);
         return new NextResponse("Internal error", { status: 500 });
     }
-};
+}
 
