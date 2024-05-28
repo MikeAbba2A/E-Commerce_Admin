@@ -129,6 +129,7 @@ export async function DELETE(
             return new NextResponse("Non autorisé", { status: 403 });
         }
 
+        // Suppression du produit
         await prismadb.product.delete({
             where: {
                 id: params.productId,
