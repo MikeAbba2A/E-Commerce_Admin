@@ -1,3 +1,4 @@
+import { NextApiRequest, NextApiResponse } from 'next';
 import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
@@ -14,7 +15,10 @@ export async function GET (
         const size = await prismadb.size.findUnique({
             where:{
                 id: params.sizeId,
-            }  
+            },
+            include: {
+                categories: true
+            }
         });
         return NextResponse.json(size);
 
@@ -32,7 +36,7 @@ export async function PATCH (
         const { userId } = auth();
         const body = await req.json();
 
-        const { name, value } = body;
+        const { name, value, categoryIds } = body;
 
         if(!userId){
             return new NextResponse("Non authentifié", { status: 401 });
@@ -61,13 +65,16 @@ export async function PATCH (
             return new NextResponse("Non autorisé", { status: 403 });
         }
 
-        const size = await prismadb.size.updateMany({
+        const size = await prismadb.size.update({
             where:{
                 id: params.sizeId,
             },
             data: {
                 name,
-                value
+                value,
+                categories: {
+                    set: categoryIds.map((id: string) => ({ id }))
+                }
             }    
         });
         return NextResponse.json(size);
@@ -105,7 +112,7 @@ export async function DELETE (
             return new NextResponse("Non autorisé", { status: 403 });
         }
 
-        const size = await prismadb.size.deleteMany({
+        const size = await prismadb.size.delete({
             where:{
                 id: params.sizeId,
             }  
@@ -117,4 +124,3 @@ export async function DELETE (
         return new NextResponse("Internal error", { status: 500 });
     }
 };
-

@@ -1,11 +1,11 @@
 "use client";
 
-import { Size } from "@prisma/client";
+import { Size, Category } from "@prisma/client";
 import { Trash } from "lucide-react";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
@@ -24,21 +24,21 @@ import axios from "axios";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { AlertModal } from "@/components/modals/alert-modal";
-import ImageUpload from "@/components/ui/image-upload";
 
 const formSchema = z.object({
     name: z.string().min(1, {
-        message: 'Le nom doit comporter au moins 1 caractères.',
+        message: 'Le nom doit comporter au moins 1 caractère.',
     }),
     value: z.string().min(1, {
-        message: 'Le nom doit comporter au moins 1 caractères.',
+        message: 'La valeur doit comporter au moins 1 caractère.',
     }),
+    categoryIds: z.array(z.string()).optional(),
 });
 
 type SizeFormValues = z.infer<typeof formSchema>;
 
 interface SizeFormProps {
-    initialData: Size | null;
+    initialData: Size & { categories: Category[] } | null;
 }
 
 export const SizeForm: React.FC<SizeFormProps> = ({
@@ -49,49 +49,60 @@ export const SizeForm: React.FC<SizeFormProps> = ({
 
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [categories, setCategories] = useState<Category[]>([]);
+
+    const form = useForm<SizeFormValues>({
+        resolver: zodResolver(formSchema),
+        defaultValues: initialData || {
+            name: '',
+            value: '',
+            categoryIds: []
+        }
+    });
+
+    useEffect(() => {
+        axios.get(`/api/${params.storeId}/categories`).then(response => {
+            setCategories(response.data);
+        });
+
+        if (initialData) {
+            form.setValue('categoryIds', initialData.categories.map(category => category.id));
+        }
+    }, [initialData, params.storeId, form]);
 
     const title = initialData ? "Editer les tailles" : "Créer une taille";
     const description = initialData ? "Editer les tailles" : "Ajouter une taille";
     const toastMessage = initialData ? "Taille mise à jour" : "Taille créée";
     const action = initialData ? "Sauvegarder" : "Créer";
 
-    const form = useForm<SizeFormValues>({
-        resolver: zodResolver(formSchema),
-        defaultValues: initialData || {
-            name: '',
-            value: ''
-        }
-    });
-
     const onSubmit = async (data: SizeFormValues) => {
-        try{
+        try {
             setLoading(true);
-            if(initialData){
+            if (initialData) {
                 await axios.patch(`/api/${params.storeId}/sizes/${params.sizeId}`, data);
-            }else{
+            } else {
                 await axios.post(`/api/${params.storeId}/sizes`, data);
-
             }
             router.refresh();
             router.push(`/${params.storeId}/sizes`);
             toast.success(toastMessage);
-        } catch(error){
+        } catch (error) {
             toast.error("Une erreur est survenue");
-        }finally{
+        } finally {
             setLoading(false);
         }
     };
 
     const onDelete = async () => {
-        try{
+        try {
             setLoading(true);
             await axios.delete(`/api/${params.storeId}/sizes/${params.sizeId}`)
             router.refresh();
             router.push(`/${params.storeId}/sizes`);
             toast.success("Taille supprimée");
-        }catch(error){
-            toast.error("Assurez-vous d'abord d'avoir supprimé tous vos produits uitlisant cette taille");
-        }finally{
+        } catch (error) {
+            toast.error("Assurez-vous d'abord d'avoir supprimé tous vos produits utilisant cette taille");
+        } finally {
             setLoading(false);
             setOpen(false);
         }
@@ -112,13 +123,13 @@ export const SizeForm: React.FC<SizeFormProps> = ({
                 />
                 {initialData && (
                     <Button
-                    disabled={loading}
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => setOpen(true)}            
-                >
-                    <Trash className="h-4 w-4" />
-                </Button>
+                        disabled={loading}
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => setOpen(true)}            
+                    >
+                        <Trash className="h-4 w-4" />
+                    </Button>
                 )}
             </div>
             <Separator />
@@ -152,14 +163,31 @@ export const SizeForm: React.FC<SizeFormProps> = ({
                                 </FormItem>
                             )}
                         />
+                        <FormField 
+                            control={form.control}
+                            name="categoryIds"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Catégories</FormLabel>
+                                    <FormControl>
+                                        <select multiple {...field} disabled={loading} className="w-full border border-gray-300 rounded-md">
+                                            {categories.map(category => (
+                                                <option key={category.id} value={category.id}>
+                                                    {category.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </div>
                     <Button disabled={loading} className="ml-auto" type="submit">
                         {action}
                     </Button>
                 </form>
             </Form>
-          
-            
         </>
     )
 }
