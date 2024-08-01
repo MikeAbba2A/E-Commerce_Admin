@@ -2,30 +2,32 @@ import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-export async function GET (
+export async function GET(
     req: Request,
     { params }: { params: { categoryId: string } }
-){
-    try{
-        if(!params.categoryId){
-            return new NextResponse("CategorieId est  obligatoire", { status: 400 });
+  ) {
+    try {
+      if (!params.categoryId) {
+        return new NextResponse("CategorieId est obligatoire", { status: 400 });
+      }
+  
+      const category = await prismadb.category.findUnique({
+        where: {
+          id: params.categoryId,
+        },
+        include: {
+          billboard: true,
+          sizes: true, // Inclure les tailles
         }
-
-        const category = await prismadb.category.findUnique({
-            where:{
-                id: params.categoryId,
-            },
-            include: {
-                billboard: true,
-            }  
-        });
-        return NextResponse.json(category);
-
-    }catch(error){
-        console.log('[CATEGORIES_GET]', error);
-        return new NextResponse("Internal error", { status: 500 });
+      });
+  
+      return NextResponse.json(category);
+    } catch (error) {
+      console.log('[CATEGORIES_GET]', error);
+      return new NextResponse("Internal error", { status: 500 });
     }
 };
+
 
 export async function PATCH (
     req: Request,
