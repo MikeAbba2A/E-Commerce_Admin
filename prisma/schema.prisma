@@ -26,6 +26,7 @@ model Store {
   orders      Order[]       @relation("StoreToOrder")
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+  sliderImages SliderImage[]
 }
 
 model Billboard {
@@ -144,4 +145,15 @@ model OrderItem {
 
   @@index([orderId])
   @@index([productId])
+}
+
+model SliderImage {
+  id        String   @id @default(uuid())
+  url       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  storeId   String
+  store     Store    @relation(fields: [storeId], references: [id])
+
+  @@index([storeId])
 }
