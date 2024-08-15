@@ -39,11 +39,22 @@ const SliderAdmin = () => {
 
   useEffect(() => {
     if (params.storeId) {
-      axios.get(`/api/${params.storeId}/slider-images`).then((response) => {
-        setImages(response.data);
-        form.setValue('images', response.data);
-      }).catch(error => {
-        console.error('Error fetching slider images:', error);
+      axios.get(`/api/${params.storeId}/slider-images`).then(async (response) => {
+        const validImages = [];
+        for (const image of response.data) {
+          try {
+            await axios.get(image.url);
+            validImages.push(image);
+          } catch (err) {
+            if (axios.isAxiosError(err) && err.response?.status !== 404) {
+              console.error('Error verifying image:', err);
+            }
+          }
+        }
+        setImages(validImages);
+        form.setValue('images', validImages);
+      }).catch(err => {
+        console.error('Error fetching slider images:', err);
         toast.error("Erreur lors de la récupération des images");
       });
     }
@@ -56,11 +67,12 @@ const SliderAdmin = () => {
 
     try {
       const response = await axios.post(`https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`, formData);
+      console.log('Image uploaded to Cloudinary:', response.data.secure_url);
       return response.data.secure_url;
-    } catch (error) {
-      console.error('Error uploading image to Cloudinary:', error);
+    } catch (err) {
+      console.error('Error uploading image to Cloudinary:', err);
       toast.error("Erreur lors de l'upload de l'image");
-      throw error;
+      throw err;
     }
   };
 
@@ -78,11 +90,13 @@ const SliderAdmin = () => {
         })
       );
 
+      console.log('Uploading images:', uploadedImages);
+
       await axios.post(`/api/${params.storeId}/slider-images`, { images: uploadedImages });
       router.refresh();
       toast.success("Images du slider mises à jour");
-    } catch (error) {
-      console.error('Error submitting slider images:', error);
+    } catch (err) {
+      console.error('Error submitting slider images:', err);
       toast.error("Une erreur est survenue");
     } finally {
       setLoading(false);
@@ -94,12 +108,27 @@ const SliderAdmin = () => {
       setLoading(true);
       await axios.delete(`/api/${params.storeId}/slider-images/${id}`);
       setImages(images.filter((image) => image.id !== id));
-    } catch (error) {
-      console.error('Error deleting slider image:', error);
+    } catch (err) {
+      console.error('Error deleting slider image:', err);
       toast.error("Une erreur est survenue lors de la suppression");
     } finally {
       setLoading(false);
       setOpen(false);
+    }
+  };
+
+  const onDeleteAll = async () => {
+    try {
+      setLoading(true);
+      console.log('Deleting all images for store:', params.storeId); // Ajout de log
+      await axios.delete(`/api/${params.storeId}/slider-images/deleteAll`);
+      setImages([]);
+      toast.success("Toutes les images du slider ont été supprimées");
+    } catch (err) {
+      console.error('Error deleting all slider images:', err);
+      toast.error("Une erreur est survenue lors de la suppression de toutes les images");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -113,6 +142,7 @@ const SliderAdmin = () => {
       />
       <div className="flex items-center justify-between">
         <h1>Gérer les images du slider</h1>
+        <Button onClick={onDeleteAll} disabled={loading}>Supprimer toutes les images</Button>
       </div>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
         <ImageUpload 

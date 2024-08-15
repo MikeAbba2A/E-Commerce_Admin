@@ -91,8 +91,8 @@ model Product {
   store       Store     @relation("StoreToProduct", fields: [storeId], references: [id])
   categoryId  String
   category    Category  @relation("CategoryToProduct", fields: [categoryId], references: [id])
-  name        String
-  description String
+  name        String    @db.VarChar(255)  // Augmenter la longueur si nécessaire
+  description String    @db.Text  // Utiliser texte pour des descriptions longues
   price       Decimal
   isFeatured  Boolean   @default(false)
   isArchived  Boolean   @default(false)
