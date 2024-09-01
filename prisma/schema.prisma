@@ -149,7 +149,7 @@ model OrderItem {
 
 model SliderImage {
   id        String   @id @default(uuid())
-  url       String
+  url       String   @db.VarChar(500)  // Augmentez la taille ici si nécessaire
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   storeId   String

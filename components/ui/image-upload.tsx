@@ -1,78 +1,53 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { Button } from "./button";
-import { ImagePlus, Trash } from "lucide-react";
-import Image from "next/image";
-import { CldUploadWidget } from "next-cloudinary";
+import React, { useState } from 'react';
 
 interface ImageUploadProps {
-    disabled?: boolean;
-    onChange: (value: string) => void;
-    onRemove: (value: string) => void;
-    value: string[];
+  value: string[];
+  onChange: (file: File) => void;
+  onRemove: (url: string) => void;
+  disabled?: boolean;
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({
-    disabled,
-    onChange,
-    onRemove,
-    value
-}) => {
-    const [isMounted, setIsMounted] = useState(false);
+const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, onRemove, disabled }) => {
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const filesArray = Array.from(files);
+      setSelectedFiles((prevFiles) => [...prevFiles, ...filesArray]);
 
-    const onUpload = (result: any) => {
-        onChange(result.info.secure_url);
+      filesArray.forEach((file) => {
+        onChange(file);
+      });
     }
+  };
 
-    if(!isMounted){
-        return null;
-    }
-
-    return (
-        <div>
-            <div className="mb-4 flex items-center gap-4">
-                {value.map((url) => (
-                    <div key={url} className="relative w-[200px] h-[200px] rounded-md overflow-hidden ">
-                        <div className="z-10 absolute top-2 right-2">
-                            <Button type="button" onClick={() => onRemove(url)} variant="destructive" size="icon"> 
-                                <Trash className="h-4 w-4" />
-                            </Button>   
-                        </div>
-                        <Image 
-                            fill
-                            className="object-cover"
-                            alt="Image"
-                            src={url}
-                        />
-                    </div>
-                ))}
-            </div>
-            <CldUploadWidget onUpload={onUpload} uploadPreset="eylsx0u0">
-                {({ open }) => {
-                    const onClick = () => {
-                        open();
-                    }
-
-                    return(
-                        <Button
-                            type="button"
-                            disabled={disabled}
-                            variant="secondary"
-                            onClick={onClick}
-                        >
-                            <ImagePlus className="h-4 w-4 mr-2" />
-                            Télécharger une image
-                        </Button>
-                    )
-                }}
-            </CldUploadWidget>
-        </div>
-    )
-}
+  return (
+    <div>
+      <input 
+        type="file" 
+        onChange={handleFileChange} 
+        disabled={disabled}
+        accept="image/*"
+        multiple 
+      />
+      <div className="grid grid-cols-3 gap-4 mt-4">
+        {value.map((url, index) => (
+          <div key={index} className="relative">
+            <img src={url} alt={`Uploaded ${index}`} className="object-cover w-full h-32" />
+            <button 
+              type="button"
+              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+              onClick={() => onRemove(url)}
+              disabled={disabled}
+            >
+              X
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export default ImageUpload;

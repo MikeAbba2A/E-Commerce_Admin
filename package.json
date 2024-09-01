@@ -24,6 +24,7 @@
     "@tanstack/react-table": "^8.16.0",
     "axios": "^1.7.4",
     "class-variance-authority": "^0.7.0",
+    "cloudinary": "^2.4.0",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
